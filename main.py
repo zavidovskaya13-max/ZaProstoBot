@@ -1,23 +1,23 @@
 import asyncio
-import os
-from aiogram import Bot, Dispatcher
+import logging
+import sys
+from os import getenv
 from dotenv import load_dotenv
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from handlers import router
 
 load_dotenv()
+TOKEN = getenv("BOT_TOKEN")
 
 async def main():
-    bot_token = os.getenv("BOT_TOKEN")
-    if not bot_token:
-        print("Ошибка: BOT_TOKEN не найден в .env!")
-        return
-
-    bot = Bot(token=bot_token)
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
     dp.include_router(router)
-
-    print("Бот успешно запущен на Python 3.14 и ожидает сообщения...")
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     asyncio.run(main())
